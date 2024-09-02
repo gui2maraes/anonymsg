@@ -1,0 +1,27 @@
+[package]
+name = "anonymsg"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7.5"
+serde = { version = "1.0.209", features = ["derive"] }
+tokio = { version = "1.39.3", features = ["full"] }
+
+rsa = { version = "0.9", features = ["serde"] }
+sqlx = { version = "0.8.1", features = [
+    "macros",
+    "postgres",
+    "runtime-tokio",
+    "tls-rustls",
+    "uuid",
+    "migrate",
+] }
+config = { version = "0.14.0", default-features = false, features = ["yaml"] }
+secrecy = { version = "0.8.0", features = ["serde"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tower = "0.5.0"
+tower-http = { version = "0.5.2", features = ["trace"] }
+tracing-appender = "0.2.3"
+uuid = { version = "1.10.0", features = ["v4"] }
