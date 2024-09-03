@@ -10,7 +10,7 @@ create table keymap(
 );
 CREATE INDEX names_idx ON keymap USING GIST (name gist_trgm_ops);
 
-create table posts(
+create table messages(
     id uuid primary key,
     recipient varchar(100) references keymap(name),
     content text not null,

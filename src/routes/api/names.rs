@@ -1,6 +1,4 @@
-use crate::domain::key::KeyName;
-use crate::domain::key::PemPublicKey;
-use crate::NameMapState;
+use crate::domain::key::{KeyName, PemPublicKey};
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::Json;
@@ -8,14 +6,14 @@ use sqlx::PgPool;
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Params {
-    name: String,
+    name: KeyName,
 }
 #[tracing::instrument(skip(pool), name = "get public_key by name")]
 pub async fn get_key(
-    Path(params): Path<Params>,
     State(pool): State<PgPool>,
+    Json(params): Json<Params>,
 ) -> Result<Json<PemPublicKey>, StatusCode> {
-    let k = match get_key_by_name(&pool, &params.name).await {
+    let k = match get_key_by_name(&pool, params.name.name()).await {
         Ok(k) => k,
         Err(sqlx::Error::RowNotFound) => return Err(StatusCode::NOT_FOUND),
         Err(e) => {
@@ -34,10 +32,10 @@ pub async fn get_key(
 }
 #[tracing::instrument(skip(pool), name = "name fuzzy search")]
 pub async fn name_search(
-    Path(params): Path<Params>,
     State(pool): State<PgPool>,
+    Json(params): Json<Params>,
 ) -> Result<Json<Vec<String>>, StatusCode> {
-    let names = match name_fuzzy_search(&pool, &params.name).await {
+    let names = match name_fuzzy_search(&pool, params.name.name()).await {
         Ok(names) => names,
         Err(e) => {
             tracing::error!("database error: {e}");
