@@ -8,12 +8,8 @@ use tokio::sync::RwLock;
 use crate::routes;
 
 pub fn application(pool: sqlx::PgPool) -> Router {
-    let map = Arc::new(RwLock::new(NameMap::new()));
     Router::new()
-        .route("/names", get(routes::names::list_namemap))
-        .route("/names/:name", get(routes::names::get_key))
-        .route("/register", post(routes::register::register))
-        .with_state(map)
+        .nest("/api", routes::api::router())
         .with_state(pool)
         .layer(tower_http::trace::TraceLayer::new_for_http())
 }

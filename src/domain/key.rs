@@ -76,6 +76,11 @@ impl Borrow<str> for KeyName {
         self.name()
     }
 }
+impl std::fmt::Display for KeyName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 fn is_valid_char(c: char) -> bool {
     match c {
