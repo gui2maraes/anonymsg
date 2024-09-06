@@ -1,0 +1,19 @@
+.key-panel {
+    background-color: #252525;
+    grid-area: key-panel;
+}
+
+.key-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    overflow: auto;
+    max-width: 100%;
+}
+
+.key-panel > .title {
+    padding: 10px;
+    background-color: #142222;
+}

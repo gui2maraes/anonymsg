@@ -1,0 +1,38 @@
+#root {
+    height: 100vh;
+    width: 100vw;
+}
+html {
+    height: 100vh;
+}
+body {
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+}
+.app {
+    height: 100vh;
+    max-height: 100vh;
+    width: 100%;
+    display: grid;
+    grid-template-rows: 1fr 9fr;
+    grid-template-columns: 1fr 4fr 2fr;
+    grid-template-areas:
+        "header header header"
+        "key-panel message-board message-sender";
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    padding: 0;
+    margin: 0;
+}

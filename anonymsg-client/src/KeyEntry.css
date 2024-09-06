@@ -1,0 +1,17 @@
+.key-entry {
+    background-color: #151515;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.key-entry:hover {
+    background-color: #101010;
+}
+
+.key-content {
+    background-color: black;
+}
+
+.key-name {
+    text-overflow: ellipsis;
+}

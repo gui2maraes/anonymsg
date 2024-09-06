@@ -1,9 +1,5 @@
-use crate::domain::namemap::NameMap;
-use axum::routing::{get, post};
 use axum::Router;
-use std::sync::Arc;
 use tokio::net::ToSocketAddrs;
-use tokio::sync::RwLock;
 
 use crate::routes;
 
@@ -12,6 +8,7 @@ pub fn application(pool: sqlx::PgPool) -> Router {
         .nest("/api", routes::api::router())
         .with_state(pool)
         .layer(tower_http::trace::TraceLayer::new_for_http())
+        .fallback_service(routes::ui::ui_server())
 }
 
 pub async fn run(addr: impl ToSocketAddrs, pool: sqlx::PgPool) {

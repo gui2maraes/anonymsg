@@ -1,0 +1,10 @@
+.header {
+    background-color: #162f27;
+    grid-area: header;
+    padding: 20px;
+}
+
+.header h1 {
+    padding: 0;
+    margin: 0;
+}

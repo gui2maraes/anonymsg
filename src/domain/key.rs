@@ -1,35 +1,63 @@
+use jsonwebkey as jwk;
+use jwk::JsonWebKey;
 use std::borrow::Borrow;
 
-use rsa::pkcs8::DecodePublicKey;
-use rsa::pkcs8::EncodePublicKey;
-use rsa::RsaPublicKey;
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(try_from = "jsonwebkey::JsonWebKey", into = "jsonwebkey::JsonWebKey")]
+pub struct JsonPublicKey(JsonWebKey);
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
-#[serde(try_from = "String", into = "String")]
-pub struct PemPublicKey(pub rsa::RsaPublicKey);
-impl PemPublicKey {
-    pub fn pem_string(&self) -> String {
+impl JsonPublicKey {
+    pub fn key(&self) -> &JsonWebKey {
+        &self.0
+    }
+}
+impl TryFrom<JsonWebKey> for JsonPublicKey {
+    type Error = String;
+    fn try_from(value: JsonWebKey) -> Result<Self, Self::Error> {
+        if value.algorithm != Some(jwk::Algorithm::RS256) {
+            return Err("key is not RSA-256".into());
+        }
+        if !value.key_ops.contains(jwk::KeyOps::ENCRYPT) {
+            return Err("key_ops does not contain `encrypt`".into());
+        }
+        if value.key.is_private() {
+            return Err("key must be a public RSA-AOEP-256 key".into());
+        }
+        Ok(Self(value))
+    }
+}
+impl Into<JsonWebKey> for JsonPublicKey {
+    fn into(self) -> JsonWebKey {
         self.0
-            .to_public_key_pem(rsa::pkcs8::LineEnding::LF)
-            .unwrap()
-    }
-    pub fn from_pem(pem: &str) -> Result<Self, rsa::pkcs8::spki::Error> {
-        Ok(Self(RsaPublicKey::from_public_key_pem(pem)?))
     }
 }
 
-impl TryFrom<String> for PemPublicKey {
-    type Error = rsa::pkcs8::spki::Error;
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        Self::from_pem(&value)
-    }
-}
+// #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+// #[serde(try_from = "String", into = "String")]
+// pub struct PemPublicKey(pub rsa::RsaPublicKey);
+// impl PemPublicKey {
+//     pub fn pem_string(&self) -> String {
+//         self.0
+//             .to_public_key_pem(rsa::pkcs8::LineEnding::LF)
+//             .unwrap()
+//     }
+//     pub fn from_pem(pem: &str) -> Result<Self, rsa::pkcs8::spki::Error> {
+//         Ok(Self(RsaPublicKey::from_public_key_pem(pem)?))
+//     }
+// }
 
-impl Into<String> for PemPublicKey {
-    fn into(self) -> String {
-        self.pem_string()
-    }
-}
+// impl TryFrom<String> for PemPublicKey {
+//     type Error = rsa::pkcs8::spki::Error;
+//     fn try_from(value: String) -> Result<Self, Self::Error> {
+//         Self::from_pem(&value)
+//     }
+// }
+
+// impl Into<String> for PemPublicKey {
+//     fn into(self) -> String {
+//         self.pem_string()
+//     }
+// }
 
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]

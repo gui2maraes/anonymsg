@@ -1,5 +1,5 @@
-use crate::domain::key::{KeyName, PemPublicKey};
-use axum::extract::{Path, State};
+use crate::domain::key::{JsonPublicKey, KeyName};
+use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
 use sqlx::PgPool;
@@ -12,19 +12,12 @@ pub struct Params {
 pub async fn get_key(
     State(pool): State<PgPool>,
     Json(params): Json<Params>,
-) -> Result<Json<PemPublicKey>, StatusCode> {
-    let k = match get_key_by_name(&pool, params.name.name()).await {
+) -> Result<Json<JsonPublicKey>, StatusCode> {
+    let key = match get_key_by_name(&pool, params.name.name()).await {
         Ok(k) => k,
         Err(sqlx::Error::RowNotFound) => return Err(StatusCode::NOT_FOUND),
         Err(e) => {
             tracing::error!("database error: {e}");
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
-    let key = match PemPublicKey::from_pem(&k) {
-        Ok(k) => k,
-        Err(e) => {
-            tracing::error!("failed to parse stored PEM public key: {e}");
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
@@ -45,11 +38,15 @@ pub async fn name_search(
     Ok(Json(names))
 }
 
-async fn get_key_by_name(pool: &PgPool, name: &str) -> sqlx::Result<String> {
-    let key_str = sqlx::query!("SELECT public_key FROM keymap WHERE name = $1", name)
-        .fetch_one(pool)
-        .await?;
-    Ok(key_str.public_key)
+async fn get_key_by_name(pool: &PgPool, name: &str) -> sqlx::Result<JsonPublicKey> {
+    let key_str = sqlx::query!(
+        r#"SELECT public_key as "key: sqlx::types::Json<JsonPublicKey>"
+        FROM keymap WHERE name = $1"#,
+        name
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(key_str.key.0)
 }
 
 async fn name_fuzzy_search(pool: &PgPool, name: &str) -> sqlx::Result<Vec<String>> {

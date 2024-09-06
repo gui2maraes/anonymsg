@@ -9,6 +9,7 @@ use crate::domain::key::KeyName;
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct PublishMessage {
+    // base64 encoded string
     pub content: String,
     pub recipient: KeyName,
 }
@@ -33,7 +34,7 @@ pub async fn publish_message(
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct GetMessages {
     pub recipient: KeyName,
-    pub limit: u32,
+    pub limit: Option<u32>,
 }
 
 #[tracing::instrument(skip(pool), name = "get published messages")]
@@ -41,7 +42,7 @@ pub async fn get_messages(
     State(pool): State<PgPool>,
     Json(get_msg): Json<GetMessages>,
 ) -> Result<Json<Vec<Message>>, StatusCode> {
-    match get_sent_msgs(&pool, get_msg.recipient.name(), get_msg.limit).await {
+    match get_sent_msgs(&pool, get_msg).await {
         Ok(msgs) => Ok(Json(msgs)),
         Err(e) => {
             tracing::error!("error getting messages: {e}");
@@ -67,13 +68,16 @@ pub struct Message {
     pub content: String,
     pub sent_at: DateTime<Utc>,
 }
-async fn get_sent_msgs(pool: &PgPool, recipient: &str, limit: u32) -> sqlx::Result<Vec<Message>> {
-    let limit = limit.min(200);
+async fn get_sent_msgs(pool: &PgPool, get_msg: GetMessages) -> sqlx::Result<Vec<Message>> {
+    let limit = match get_msg.limit {
+        Some(l) => l.min(200),
+        None => 10,
+    };
     let msgs = sqlx::query!(
         r#"
         SELECT content, sent_at FROM messages WHERE recipient = $1 ORDER BY sent_at LIMIT $2
         "#,
-        recipient,
+        get_msg.recipient.name(),
         limit as i32
     )
     .fetch_all(pool)

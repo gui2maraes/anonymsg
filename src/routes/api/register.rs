@@ -1,5 +1,4 @@
-use crate::domain::key::KeyName;
-use crate::domain::key::PemPublicKey;
+use crate::domain::key::{JsonPublicKey, KeyName};
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -11,7 +10,8 @@ use tracing::instrument;
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct RegisterInfo {
     name: KeyName,
-    key: PemPublicKey,
+    #[serde(rename = "publicKey")]
+    public_key: JsonPublicKey,
 }
 
 #[instrument(skip(pool, info), fields(name = %info.name))]
@@ -19,7 +19,6 @@ pub async fn register(State(pool): State<PgPool>, Json(info): Json<RegisterInfo>
     match register_key(&pool, info).await {
         Ok(()) => StatusCode::CREATED.into_response(),
         Err(e) => match e.into_database_error() {
-
             Some(e) if e.is_unique_violation() => StatusCode::CONFLICT.into_response(),
             Some(e) => Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -35,7 +34,7 @@ async fn register_key(pool: &PgPool, info: RegisterInfo) -> sqlx::Result<()> {
     sqlx::query!(
         "INSERT INTO keymap (name, public_key) VALUES ($1, $2)",
         info.name.name(),
-        info.key.pem_string()
+        serde_json::to_value(info.public_key).unwrap()
     )
     .execute(pool)
     .await?;
