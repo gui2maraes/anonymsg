@@ -1,9 +1,9 @@
-use anonymsg::startup::run;
+use blindchannel::startup::run;
 use std::process::ExitCode;
 #[tokio::main]
 async fn main() -> ExitCode {
-    let _guard = anonymsg::telemetry::init_subscriber();
-    let settings = match anonymsg::configuration::get_configuration() {
+    let _guard = blindchannel::telemetry::init_subscriber();
+    let settings = match blindchannel::configuration::get_configuration() {
         Ok(s) => s,
         Err(e) => {
             tracing::error!("unable to get configuration: {e}");

@@ -16,5 +16,6 @@ pub async fn run(addr: impl ToSocketAddrs, pool: sqlx::PgPool) {
     let listener = tokio::net::TcpListener::bind(addr)
         .await
         .expect("failed to bind to address");
+    tracing::info!("running on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
 }

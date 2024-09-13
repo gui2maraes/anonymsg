@@ -16,14 +16,14 @@ pub fn init_subscriber() -> tracing_appender::non_blocking::WorkerGuard {
         Environment::Production => non_blocking(
             RollingFileAppender::builder()
                 .rotation(Rotation::DAILY)
-                .filename_prefix("zero2prod")
+                .filename_prefix("blindchannel")
                 .filename_suffix("log")
                 .build("logs")
                 .expect("failed to initialize rolling file appender"),
         ),
     };
     let filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| "anonymsg=debug,tower_http=debug,axum::rejection=trace".into());
+        .unwrap_or_else(|_| "blindchannel=debug,tower_http=debug,axum::rejection=trace".into());
 
     tracing_subscriber::fmt()
         .with_env_filter(filter)

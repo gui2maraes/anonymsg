@@ -6,14 +6,27 @@ use axum::response::Response;
 use axum::Json;
 use sqlx::PgPool;
 use tracing::instrument;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, utoipa::ToSchema)]
 pub struct RegisterInfo {
     name: KeyName,
     #[serde(rename = "publicKey")]
     public_key: PublicJwk,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/register",
+    request_body = RegisterInfo,
+    responses(
+        (status = CREATED, description = "Key registered succesfully"),
+        (status = CONFLICT, description = "Name already exists"),
+        (status = INTERNAL_SERVER_ERROR)
+    )
+
+
+)]
 #[instrument(skip(pool, info), fields(name = %info.name))]
 pub async fn register(State(pool): State<PgPool>, Json(info): Json<RegisterInfo>) -> Response {
     match register_key(&pool, info).await {

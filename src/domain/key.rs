@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
+use utoipa::ToSchema;
 
 use super::bytevec::ByteVec;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, ToSchema)]
 #[serde(try_from = "String", into = "String")]
 pub struct KeyName(String);
 
@@ -66,7 +67,7 @@ fn is_valid_char(c: char) -> bool {
 // key type, and the algorithm used (RSA-AOEP-256) is not supported by
 // the crate.
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 pub struct PublicJwk {
     pub e: PublicExponent,
     pub n: ByteVec,
