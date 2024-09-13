@@ -1,4 +1,4 @@
-use crate::domain::key::{JsonPublicKey, KeyName};
+use crate::domain::key::{PublicJwk, KeyName};
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -11,7 +11,7 @@ use tracing::instrument;
 pub struct RegisterInfo {
     name: KeyName,
     #[serde(rename = "publicKey")]
-    public_key: JsonPublicKey,
+    public_key: PublicJwk,
 }
 
 #[instrument(skip(pool, info), fields(name = %info.name))]

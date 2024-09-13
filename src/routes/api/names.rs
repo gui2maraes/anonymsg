@@ -1,4 +1,4 @@
-use crate::domain::key::{JsonPublicKey, KeyName};
+use crate::domain::key::{PublicJwk, KeyName};
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
@@ -12,7 +12,7 @@ pub struct Params {
 pub async fn get_key(
     State(pool): State<PgPool>,
     Json(params): Json<Params>,
-) -> Result<Json<JsonPublicKey>, StatusCode> {
+) -> Result<Json<PublicJwk>, StatusCode> {
     let key = match get_key_by_name(&pool, params.name.name()).await {
         Ok(k) => k,
         Err(sqlx::Error::RowNotFound) => return Err(StatusCode::NOT_FOUND),
@@ -38,9 +38,9 @@ pub async fn name_search(
     Ok(Json(names))
 }
 
-async fn get_key_by_name(pool: &PgPool, name: &str) -> sqlx::Result<JsonPublicKey> {
+async fn get_key_by_name(pool: &PgPool, name: &str) -> sqlx::Result<PublicJwk> {
     let key_str = sqlx::query!(
-        r#"SELECT public_key as "key: sqlx::types::Json<JsonPublicKey>"
+        r#"SELECT public_key as "key: sqlx::types::Json<PublicJwk>"
         FROM keymap WHERE name = $1"#,
         name
     )
