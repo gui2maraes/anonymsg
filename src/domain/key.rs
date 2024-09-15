@@ -1,10 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
-use utoipa::ToSchema;
 
 use super::bytevec::ByteVec;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[serde(try_from = "String", into = "String")]
 pub struct KeyName(String);
 
@@ -64,15 +63,24 @@ fn is_valid_char(c: char) -> bool {
 
 // A lot of this code is copied from the `jsonwebkey` crate.
 // I just need the functionality for (de)serializing a very specific
-// key type, and the algorithm used (RSA-AOEP-256) is not supported by
+// key type, and the algorithm used (RSA-OAEP-256) is not supported by
 // the crate.
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PublicJwk {
+    /// base64 string - must be "AQAB" or "AQAB=="
     pub e: PublicExponent,
+
+    /// base64 string containing p*q
     pub n: ByteVec,
+
+    /// algorithm used - must be "RSA-OAEP-256"
     pub alg: Algorithm,
+
+    /// key type - must be "RSA"
     pub kty: KeyType,
+
+    /// key use - must be "enc"
     #[serde(default, rename = "use")]
     pub key_use: KeyUse,
 }

@@ -7,25 +7,14 @@ use serde::{Serialize, Deserialize};
 
 use crate::domain::key::KeyName;
 
-#[derive(Debug, Clone, Serialize, Deserialize, utoipa::ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PublishMessage {
     /// base64 encoded string
     pub content: String,
     /// recipient name
-    #[schema(value_type = String)]
     pub recipient: KeyName,
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/publish",
-    request_body = PublishMessage,
-    responses(
-        (status = OK, description = "Message published succesfully", body = ()),
-        (status = NOT_FOUND, description = "recipient name not found"),
-        (status = INTERNAL_SERVER_ERROR, description = "Error publishing message", body = ())
-    )
-)]
 #[tracing::instrument(skip(pool, msg), name = "publishing new message")]
 pub async fn publish_message(
     State(pool): State<PgPool>,
@@ -43,24 +32,14 @@ pub async fn publish_message(
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, utoipa::ToSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct GetMessages {
     /// recipient name
-    #[schema(value_type = String)]
     pub recipient: KeyName,
     /// max messages to fetch
     pub limit: Option<u32>,
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/messages",
-    request_body = GetMessages,
-    responses(
-        (status = OK, description = "Message fetched succesfully", body = Vec<Message>),
-        (status = INTERNAL_SERVER_ERROR, description = "Error fetching message", body = ()),
-    ),
-)]
 #[tracing::instrument(skip(pool), name = "get published messages")]
 pub async fn get_messages(
     State(pool): State<PgPool>,
@@ -89,7 +68,9 @@ async fn insert_msg(pool: &PgPool, msg: PublishMessage) -> sqlx::Result<()> {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Message {
+    /// encrypted content encoded in base64
     pub content: String,
+    #[serde(rename = "sentAt")]
     pub sent_at: DateTime<Utc>,
 }
 async fn get_sent_msgs(pool: &PgPool, get_msg: GetMessages) -> sqlx::Result<Vec<Message>> {

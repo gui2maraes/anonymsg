@@ -5,22 +5,10 @@ use axum::Json;
 use sqlx::PgPool;
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, utoipa::ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Params {
-    #[schema(value_type = String)]
     name: KeyName,
 }
-#[utoipa::path(
-    post,
-    path = "/api/namefetch",
-    request_body = Params,
-    responses(
-        (status = OK, description = "Key fetched succesfully", body = PublicJwk),
-        (status = NOT_FOUND, description = "Key with name not found", body = ()),
-        (status = INTERNAL_SERVER_ERROR, body = ()),
-
-    )
-)]
 #[tracing::instrument(skip(pool), name = "get public_key by name")]
 pub async fn get_key(
     State(pool): State<PgPool>,
@@ -37,16 +25,6 @@ pub async fn get_key(
     Ok(Json(key))
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/namesearch",
-    request_body = Params,
-    responses(
-        (status = OK, description = "List of similar names", body = Vec<String>),
-        (status = INTERNAL_SERVER_ERROR, body = ()),
-
-    )
-)]
 #[tracing::instrument(skip(pool), name = "name fuzzy search")]
 pub async fn name_search(
     State(pool): State<PgPool>,
