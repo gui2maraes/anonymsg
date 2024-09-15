@@ -10,11 +10,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - name
-              properties:
-                name: string
+              $ref: '#/components/schemas/nameRequest'
       responses:
         "500":
           description: Internal server error
@@ -34,11 +30,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - name
-              properties:
-                name: string
+              $ref: '#/components/schemas/nameRequest'
       responses:
         "500":
           description: Internal Server Error
@@ -48,7 +40,8 @@ paths:
           description: Key fetched successfully
           content:
             application/json:
-              $ref: '#/components/schemas/publicJwk'
+              schema:
+                $ref: '#/components/schemas/publicJwk'
 
   /api/register:
     post:
@@ -57,14 +50,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - name
-                - publicKey
-              properties:
-                name: string
-                publicKey:
-                  $ref: '#/components/schemas/publicJwk'
+              $ref: '#/components/schemas/registerRequest'
       responses:
         "201":
           description: Name and key registered successfully
@@ -80,16 +66,15 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - content
-                - recipient
-              properties:
-                content:
-                  type: string
-                  format: byte
-                recipient:
-                  type: string
+              $ref: '#/components/schemas/publishMessage'
+      responses:
+        "201":
+          description: Message published succesfully
+        "404":
+          description: Recipient name not found
+        "500":
+          description: Internal server error
+      
 
   /api/messages:
     post:
@@ -98,16 +83,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - recipient
-              properties:
-                recipient:
-                  type: string
-                limit:
-                  type: integer
-                  minimum: 1
-                  maximum: 200
+              $ref: '#/components/schemas/getMessages'
       responses:
         "500":
           description: Internal server error
@@ -118,25 +94,68 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  required:
-                    - content
-                    - sentAt
-                  properties:
-                    content:
-                      type: string
-                      format: byte
-                    sentAt:
-                      type: string
-                      format: date-time
+                  $ref: '#/components/schemas/message'
 
-
-  /api/openapi.yaml:
-    get:
-      description: Returns this spec
 
 components:
   schemas:
+
+    getMessages:
+      type: object
+      properties:
+        recipient:
+          type: string
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+        required:
+          - recipient
+
+    message:
+      type: object
+      properties:
+        content:
+          type: string
+          format: byte
+        sentAt:
+          type: string
+          format: date-time
+      required:
+        - content
+        - sentAt
+
+    publishMessage:
+      type: object
+      properties:
+        content:
+          type: string
+          format: byte
+        recipient:
+          type: string
+      required:
+        - content
+        - recipient
+
+    registerRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        publicKey:
+          $ref: '#/components/schemas/publicJwk'
+      required:
+        - name
+        - publicKey
+
+    nameRequest:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+
     publicJwk:
       type: object
       required:
