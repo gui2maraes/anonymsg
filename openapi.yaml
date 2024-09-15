@@ -1,0 +1,146 @@
+openapi: 3.1.0
+info:
+  title: BlindChannel REST API
+  version: 0.1
+paths:
+  /api/namesearch:
+    post:
+      description: Returns a list of similar names, ordered by similarity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name: string
+      responses:
+        "500":
+          description: Internal server error
+        "200":
+          description: List of similar names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /api/namefetch:
+    post:
+      description: Returns the key associated with a given name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name: string
+      responses:
+        "500":
+          description: Internal Server Error
+        "404":
+          description: Name not found
+        "200":
+          description: Key fetched successfully
+          content:
+            application/json:
+              $ref: '#/components/schemas/publicJwk'
+
+  /api/register:
+    post:
+      description: Registers a name and key pair
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - publicKey
+              properties:
+                name: string
+                publicKey:
+                  $ref: '#/components/schemas/publicJwk'
+      responses:
+        "201":
+          description: Name and key registered successfully
+        "409":
+          description: Name already registered
+        "500":
+          description: Internal server error
+
+  /api/publish:
+    post:
+      description: Publishes a message with a recipient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+                - recipient
+              properties:
+                content:
+                  type: string
+                  format: byte
+                recipient:
+                  type: string
+
+  /api/messages:
+    post:
+      description: Returns a list of messages addressed to a given recipient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - recipient
+              properties:
+                recipient:
+                  type: string
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 200
+
+  /api/openapi.yaml:
+    get:
+      description: Returns this spec
+
+components:
+  schemas:
+    publicJwk:
+      type: object
+      required:
+        - e
+        - n
+        - alg
+        - kty
+      properties:
+        e: 
+          type: string
+          enum: 
+            - "AQAB"
+            - "AQAB=="
+        n:
+          type: string
+          format: byte
+        alg:
+          type: string
+          enum:
+            - RSA-OAEP-256
+        kty:
+          type: string
+          enum:
+            - RSA
+        use:
+          type: string
+          enum:
+            - enc
+        
