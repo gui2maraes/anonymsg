@@ -3,19 +3,22 @@ info:
   title: BlindChannel REST API
   version: 0.1
 paths:
-  /api/namesearch:
-    post:
-      description: Returns a list of similar names, ordered by similarity
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/nameRequest'
+  /api/registry/{alias}:
+    get:
+      parameters:
+        - in: path
+          name: alias
+          required: true
+          schema:
+            type: string
+          description: The key alias
+
+      description: Returns a list of similar aliases, ordered by similarity
       responses:
         "500":
           description: Internal server error
         "200":
-          description: List of similar names
+          description: List of similar aliases
           content:
             application/json:
               schema:
@@ -23,14 +26,17 @@ paths:
                 items:
                   type: string
 
-  /api/namefetch:
-    post:
-      description: Returns the key associated with a given name
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/nameRequest'
+  /api/search/{alias}:
+    get:
+      description: Returns the key associated with a given alias
+      parameters:
+        - in: path
+          name: alias
+          required: true
+          schema:
+            type: string
+          description: The key alias
+
       responses:
         "500":
           description: Internal Server Error
@@ -77,13 +83,22 @@ paths:
       
 
   /api/messages:
-    post:
+    get:
       description: Returns a list of messages addressed to a given recipient
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/getMessages'
+      parameters:
+        - in: query
+          name: recipient
+          required: true
+          description: The message recipient
+          schema:
+            type: string
+        - in: query
+          name: limit
+          description: Limit of messages to fetch
+          schema:
+            type: integer
+            minimum: 1
+
       responses:
         "500":
           description: Internal server error
@@ -99,18 +114,6 @@ paths:
 
 components:
   schemas:
-
-    getMessages:
-      type: object
-      properties:
-        recipient:
-          type: string
-        limit:
-          type: integer
-          minimum: 1
-          maximum: 200
-        required:
-          - recipient
 
     message:
       type: object
@@ -147,14 +150,6 @@ components:
       required:
         - name
         - publicKey
-
-    nameRequest:
-      type: object
-      properties:
-        name:
-          type: string
-      required:
-        - name
 
     publicJwk:
       type: object

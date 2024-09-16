@@ -1,6 +1,7 @@
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
+use axum::extract::Query;
 use chrono::{DateTime, Utc};
 use sqlx::PgPool;
 use serde::{Serialize, Deserialize};
@@ -21,7 +22,7 @@ pub async fn publish_message(
     Json(msg): Json<PublishMessage>,
 ) -> StatusCode {
     match insert_msg(&pool, msg).await {
-        Ok(()) => StatusCode::OK,
+        Ok(()) => StatusCode::CREATED,
         Err(sqlx::Error::Database(err)) if err.is_foreign_key_violation() => {
             StatusCode::NOT_FOUND
         }
@@ -43,7 +44,7 @@ pub struct GetMessages {
 #[tracing::instrument(skip(pool), name = "get published messages")]
 pub async fn get_messages(
     State(pool): State<PgPool>,
-    Json(get_msg): Json<GetMessages>,
+    Query(get_msg): Query<GetMessages>,
 ) -> Result<Json<Vec<Message>>, StatusCode> {
     match get_sent_msgs(&pool, get_msg).await {
         Ok(msgs) => Ok(Json(msgs)),

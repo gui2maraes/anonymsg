@@ -3,18 +3,19 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
 use sqlx::PgPool;
+use axum::extract::Path;
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Params {
-    name: KeyName,
+    alias: KeyName,
 }
 #[tracing::instrument(skip(pool), name = "get public_key by name")]
-pub async fn get_key(
+pub async fn fetch_alias(
     State(pool): State<PgPool>,
-    Json(params): Json<Params>,
+    Path(params): Path<Params>,
 ) -> Result<Json<PublicJwk>, StatusCode> {
-    let key = match get_key_by_name(&pool, params.name.name()).await {
+    let key = match get_key_by_name(&pool, params.alias.name()).await {
         Ok(k) => k,
         Err(sqlx::Error::RowNotFound) => return Err(StatusCode::NOT_FOUND),
         Err(e) => {
@@ -26,11 +27,11 @@ pub async fn get_key(
 }
 
 #[tracing::instrument(skip(pool), name = "name fuzzy search")]
-pub async fn name_search(
+pub async fn search_alias(
     State(pool): State<PgPool>,
-    Json(params): Json<Params>,
+    Path(params): Path<Params>,
 ) -> Result<Json<Vec<String>>, StatusCode> {
-    let names = match name_fuzzy_search(&pool, params.name.name()).await {
+    let names = match name_fuzzy_search(&pool, params.alias.name()).await {
         Ok(names) => names,
         Err(e) => {
             tracing::error!("database error: {e}");
