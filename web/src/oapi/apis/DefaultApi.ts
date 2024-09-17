@@ -155,9 +155,9 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns a list of similar aliases, ordered by similarity
+     * Returns the key associated with a given alias
      */
-    async apiRegistryAliasGetRaw(requestParameters: ApiRegistryAliasGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+    async apiRegistryAliasGetRaw(requestParameters: ApiRegistryAliasGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PublicJwk>> {
         if (requestParameters['alias'] == null) {
             throw new runtime.RequiredError(
                 'alias',
@@ -176,21 +176,21 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     * Returns a list of similar aliases, ordered by similarity
-     */
-    async apiRegistryAliasGet(requestParameters: ApiRegistryAliasGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
-        const response = await this.apiRegistryAliasGetRaw(requestParameters, initOverrides);
-        return await response.value();
+        return new runtime.JSONApiResponse(response, (jsonValue) => PublicJwkFromJSON(jsonValue));
     }
 
     /**
      * Returns the key associated with a given alias
      */
-    async apiSearchAliasGetRaw(requestParameters: ApiSearchAliasGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PublicJwk>> {
+    async apiRegistryAliasGet(requestParameters: ApiRegistryAliasGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PublicJwk> {
+        const response = await this.apiRegistryAliasGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Returns a list of similar aliases, ordered by similarity
+     */
+    async apiSearchAliasGetRaw(requestParameters: ApiSearchAliasGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
         if (requestParameters['alias'] == null) {
             throw new runtime.RequiredError(
                 'alias',
@@ -209,13 +209,13 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PublicJwkFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Returns the key associated with a given alias
+     * Returns a list of similar aliases, ordered by similarity
      */
-    async apiSearchAliasGet(requestParameters: ApiSearchAliasGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PublicJwk> {
+    async apiSearchAliasGet(requestParameters: ApiSearchAliasGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
         const response = await this.apiSearchAliasGetRaw(requestParameters, initOverrides);
         return await response.value();
     }

@@ -3,7 +3,7 @@ info:
   title: BlindChannel REST API
   version: 0.1
 paths:
-  /api/registry/{alias}:
+  /api/search/{alias}:
     get:
       parameters:
         - in: path
@@ -26,7 +26,7 @@ paths:
                 items:
                   type: string
 
-  /api/search/{alias}:
+  /api/registry/{alias}:
     get:
       description: Returns the key associated with a given alias
       parameters:
@@ -143,12 +143,12 @@ components:
     registerRequest:
       type: object
       properties:
-        name:
+        alias:
           type: string
         publicKey:
           $ref: '#/components/schemas/publicJwk'
       required:
-        - name
+        - alias
         - publicKey
 
     publicJwk:

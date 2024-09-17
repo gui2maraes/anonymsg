@@ -48,6 +48,9 @@ pub async fn get_messages(
 ) -> Result<Json<Vec<Message>>, StatusCode> {
     match get_sent_msgs(&pool, get_msg).await {
         Ok(msgs) => Ok(Json(msgs)),
+        Err(sqlx::Error::RowNotFound) => {
+            Err(StatusCode::NOT_FOUND)
+        }
         Err(e) => {
             tracing::error!("error getting messages: {e}");
             Err(StatusCode::INTERNAL_SERVER_ERROR)

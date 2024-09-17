@@ -1,11 +1,8 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
-import KeyPanel from "./KeyPanel";
-import MessageBoard from "./MessageBoard";
-import MessageSender from "./MessageSender";
-import Header from "./Header";
+import KeyPanel from "./components/KeyPanel";
+import MessageBoard from "./components/MessageBoard";
+import MessageSender from "./components/MessageSender";
+import Header from "./components/Header";
 
 function App() {
   return (

@@ -14,5 +14,5 @@ if [ -z "$1" ]; then
 fi
 
 
-openapi-generator-cli generate -i "$1" -g typescript-fetch -o web/src/api \
+openapi-generator-cli generate -i "$1" -g typescript-fetch -o web/src/oapi \
     --additional-properties=supportsES6=true

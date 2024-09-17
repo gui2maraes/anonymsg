@@ -31,7 +31,7 @@ export interface RegisterRequest {
      * @type {string}
      * @memberof RegisterRequest
      */
-    name: string;
+    alias: string;
     /**
      * 
      * @type {PublicJwk}
@@ -44,7 +44,7 @@ export interface RegisterRequest {
  * Check if a given object implements the RegisterRequest interface.
  */
 export function instanceOfRegisterRequest(value: object): value is RegisterRequest {
-    if (!('name' in value) || value['name'] === undefined) return false;
+    if (!('alias' in value) || value['alias'] === undefined) return false;
     if (!('publicKey' in value) || value['publicKey'] === undefined) return false;
     return true;
 }
@@ -59,7 +59,7 @@ export function RegisterRequestFromJSONTyped(json: any, ignoreDiscriminator: boo
     }
     return {
         
-        'name': json['name'],
+        'alias': json['alias'],
         'publicKey': PublicJwkFromJSON(json['publicKey']),
     };
 }
@@ -70,7 +70,7 @@ export function RegisterRequestToJSON(value?: RegisterRequest | null): any {
     }
     return {
         
-        'name': value['name'],
+        'alias': value['alias'],
         'publicKey': PublicJwkToJSON(value['publicKey']),
     };
 }
