@@ -5,7 +5,7 @@
     "version": "7.8.0",
     "generators": {
       "v3.0": {
-        "inputSpec": "#{cwd}/openapi.yaml",
+        "inputSpec": "#{cwd}/../openapi.yaml",
         "generatorName": "typescript-fetch",
         "output": "#{cwd}/src/oapi",
         "additionalProperties": {
